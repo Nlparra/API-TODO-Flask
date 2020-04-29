@@ -44,6 +44,7 @@ def handle_hello(user_name):
         }
     
     if request.method == 'GET':
+        # if statement here 
         all_todos = Todo.query.filter_by(user_name=user_name)
         all_names = Name.query.all
         all_todos = list(map(lambda x: x.serialize(), all_todos))
