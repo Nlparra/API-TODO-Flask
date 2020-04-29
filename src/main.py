@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
-from models import db,Todo
+from models import db,Todo,Name
 
 #from models import Person
 
@@ -45,8 +45,10 @@ def handle_hello(user_name):
     
     if request.method == 'GET':
         all_todos = Todo.query.filter_by(user_name=user_name)
+        all_names = Name.query.all
         all_todos = list(map(lambda x: x.serialize(), all_todos))
-        response_body = all_todos
+        all_names = list(map(lambda x: x.serialize(), all_names))
+        response_body = all_todos,all_names
         
 
     if request.method == 'PUT':
