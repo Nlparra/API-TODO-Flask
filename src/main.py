@@ -7,7 +7,8 @@ from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
-from models import db
+from models import db,Todo
+
 #from models import Person
 
 app = Flask(__name__)
@@ -28,12 +29,45 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
+@app.route('/todos/user/<user_name>', methods=['POST', 'GET', 'PUT', 'DELETE'])
+def handle_hello(user_name):
 
-    response_body = {
-        "hello": "world"
-    }
+    response_body = None
+
+    if request.method == 'POST':
+        body = request.get_json()
+        todo = Todo(user_name=body['user_name'], label=body['label'], done='false')
+        db.session.add(todo)
+        db.session.commit()
+        response_body = {
+            "hello": "world POST"
+        }
+    
+    if request.method == 'GET':
+        all_todos = Todo.query.filter_by(user_name=user_name)
+        all_todos = list(map(lambda x: x.serialize(), all_todos))
+        response_body = all_todos
+        
+
+    if request.method == 'PUT':
+        body = request.get_json()
+        todo = Todo.query.get(body['id'])
+        todo.user_name = body['user_name']
+        todo.label = body['label']
+        todo.done = body['done']
+        db.session.commit()
+        response_body = {
+            "hello": "world Put"
+        }
+
+    if request.method == 'DELETE':
+        body = request.get_json()
+        todo = Todo.query.get(body['user_name'])
+        todo = Todo.query.filter_by(user_name=user_name).delete()
+        db.session.commit()
+        response_body = {
+            "hello": "world DELETE"
+        }
 
     return jsonify(response_body), 200
 
